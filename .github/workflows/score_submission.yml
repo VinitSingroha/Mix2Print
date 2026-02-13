@@ -54,7 +54,7 @@ jobs:
               exit(1)
               
           pred_file = files[0]
-          # Get Team Name from folder structure: submissions/inbox/TEAM_NAME/run_id/
+          # Get Team Name from folder structure: submissions/inbox/TEAM_NAME/predictions.csv
           pred_file_norm = pred_file.replace('\\\\', '/')
           parts = pred_file_norm.split('/')
           try:

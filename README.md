@@ -132,11 +132,11 @@ id,pressure,temperature,speed
 Create a folder structure:
 
 ```
-submissions/inbox/<team_name>/<run_id>/
+submissions/inbox/<team_name>/
 └── predictions.csv
 ```
 
-Example: `submissions/inbox/TeamAlpha/run_01/predictions.csv`
+Example: `submissions/inbox/TeamAlpha/predictions.csv`
 
 **Model types (for your reference in PR description):**
 - `human` — Designed by humans

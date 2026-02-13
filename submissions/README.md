@@ -9,8 +9,7 @@ Each GitHub user is allowed **exactly one** submission. Subsequent submissions w
 ```
 inbox/
 └── YourTeamName/
-    └── run_01/
-        └── predictions.csv
+    └── predictions.csv
 ```
 
 ## Required File
@@ -26,7 +25,7 @@ id,pressure,temperature,speed
 ## Submission Process
 
 1. Fork this repository
-2. Create your submission folder: `submissions/inbox/<TeamName>/<RunID>/`
+2. Create your submission folder: `submissions/inbox/<TeamName>/`
 3. Add `predictions.csv` (only this file is required)
 4. Open a Pull Request to `master`
 5. Wait for automatic scoring (a bot will comment with your score)
