@@ -1,6 +1,10 @@
 # Private data (NEVER commit test labels!)
 data/private/
 
+# Baseline/test outputs (internal only)
+outputs/
+baselines/outputs/
+
 # Python
 __pycache__/
 *.py[cod]
@@ -45,3 +49,4 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+

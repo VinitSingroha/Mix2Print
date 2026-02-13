@@ -2,7 +2,6 @@
 
 ## Team Information
 - **Team Name:** 
-- **Run ID:** 
 - **Model Type:** (human / llm-only / human+llm)
 
 ## Model Description
@@ -10,14 +9,13 @@
 
 ## Checklist
 - [ ] Added `predictions.csv` with all required columns (id, pressure, temperature, speed)
-- [ ] Added `metadata.json` with required fields
-- [ ] Predictions match test set IDs exactly
+- [ ] Predictions match test set IDs exactly (120 samples)
 - [ ] No missing or invalid values
-- [ ] Followed submission rules (no test set peeking, etc.)
+- [ ] This is my first and only submission
 
 ## Notes
 <!-- Optional: Any additional information about this submission -->
 
 ---
 
-**Note:** This PR will be automatically validated and scored. Please wait for the bot comment before requesting review.
+**Note:** This PR will be automatically scored. A bot will comment with your score. Your PR will NOT be merged — we update the leaderboard separately to keep your code private.

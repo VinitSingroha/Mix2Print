@@ -1,2 +1,1 @@
-timestamp_utc,team,model_type,combined_nmae,pressure_nmae,temperature_nmae,speed_nmae,notes
-2026-02-07T13:00:00Z,baseline_rf,human,0.059833,0.081713,0.048469,0.049318,Random Forest baseline
+timestamp_utc,team,github_user,model_type,combined_nmae,pressure_nmae,temperature_nmae,speed_nmae,notes

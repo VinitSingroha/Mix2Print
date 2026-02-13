@@ -1,22 +1,19 @@
 # Submissions
 
-Place your submissions in `inbox/<team_name>/<run_id>/`
+## ⚠️ One Submission Per Participant
+
+Each GitHub user is allowed **exactly one** submission. Subsequent submissions will be automatically rejected.
 
 ## Structure
 
 ```
 inbox/
 └── YourTeamName/
-    ├── run_001/
-    │   ├── predictions.csv
-    │   └── metadata.json
-    ├── run_002/
-    │   ├── predictions.csv
-    │   └── metadata.json
-    └── ...
+    └── run_01/
+        └── predictions.csv
 ```
 
-## Files Required
+## Required File
 
 ### predictions.csv
 ```csv
@@ -26,27 +23,15 @@ id,pressure,temperature,speed
 ...
 ```
 
-### metadata.json
-```json
-{
-  "team": "YourTeamName",
-  "run_id": "run_001",
-  "model_type": "human",
-  "model_description": "3-layer GAT with attention pooling",
-  "features_used": ["material_graph", "concentrations"],
-  "training_time_hours": 2.5,
-  "framework": "PyTorch Geometric 2.3.0",
-  "notes": "Optional notes about this run"
-}
-```
-
 ## Submission Process
 
 1. Fork this repository
-2. Create your submission folder
-3. Add predictions.csv and metadata.json
-4. Open a Pull Request to `main`
-5. Wait for automatic scoring
-6. If valid, PR will be merged and leaderboard updated
+2. Create your submission folder: `submissions/inbox/<TeamName>/<RunID>/`
+3. Add `predictions.csv` (only this file is required)
+4. Open a Pull Request to `master`
+5. Wait for automatic scoring (a bot will comment with your score)
+6. Your score will appear on the leaderboard
+
+**Note:** Your PR will NOT be merged. We score privately and update the leaderboard on the main branch.
 
 See [README.md](../README.md) for full details.

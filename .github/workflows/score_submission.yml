@@ -1,118 +1,234 @@
-name: Score Submission
+name: Score Submission (NeurIPS Style)
 
 on:
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
     paths:
       - 'submissions/inbox/**'
 
+permissions:
+  contents: write    # Needed to push leaderboard.csv
+  pull-requests: write # Needed to comment
+
 jobs:
-  validate_and_score:
+  score_and_update:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # 1. Checkout Main Branch (Organizer's Trusted Code & Leaderboard)
+      - name: Checkout Organizer Repo (Main)
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: master
+          path: organizer_repo
+          fetch-depth: 0 # Full history needed for pushes? Maybe not, but safer.
+          # Note: For branch protection, you might need a PAT token here.
+          # For public repos without branch protection, defaultGITHUB_TOKEN works.
 
+      # 2. Checkout Participant's Submission Files (Handle Forks)
+      - name: Checkout Participant Submission
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+          path: participant_repo
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
       - name: Install dependencies
-        run: |
-          pip install -r requirements.txt
+        run: pip install -r organizer_repo/requirements.txt
 
-      - name: Find submission directory
-        id: find_submission
-        run: |
-          # Find changed files in submissions/inbox/
-          CHANGED_FILES=$(git diff --name-only origin/main...HEAD | grep "^submissions/inbox/" || true)
-          
-          if [ -z "$CHANGED_FILES" ]; then
-            echo "No submission files found"
-            exit 1
-          fi
-          
-          # Extract submission directory (e.g., submissions/inbox/team/run_001)
-          SUBMISSION_DIR=$(echo "$CHANGED_FILES" | head -1 | cut -d'/' -f1-4)
-          echo "submission_dir=$SUBMISSION_DIR" >> $GITHUB_OUTPUT
-          echo "Found submission: $SUBMISSION_DIR"
-
-      - name: Validate submission
-        id: validate
+      - name: Locate Submission
+        id: find_sub
         run: |
           python -c "
-          import sys
-          sys.path.insert(0, 'competition')
-          from validation import validate_submission, format_validation_result
+          import os, glob
           
-          is_valid, errors, metadata = validate_submission(
-              '${{ steps.find_submission.outputs.submission_dir }}',
-              'data/public/test_nodes.csv'
-          )
+          # Look for predictions.csv in participant repo
+          # Use glob to find recursive paths
+          files = glob.glob('participant_repo/submissions/inbox/**/predictions.csv', recursive=True)
+          if not files:
+              print('::error::No predictions.csv found in submissions/inbox!')
+              exit(1)
+              
+          pred_file = files[0]
+          # Get Team Name from folder structure: submissions/inbox/TEAM_NAME/run_id/
+          pred_file_norm = pred_file.replace('\\\\', '/')
+          parts = pred_file_norm.split('/')
+          try:
+              inbox_idx = parts.index('inbox')
+              team_name = parts[inbox_idx + 1]
+          except:
+              team_name = 'Unknown'
+              
+          print(f'Found submission: {pred_file}')
+          print(f'Team: {team_name}')
           
-          result = format_validation_result(is_valid, errors, metadata)
-          print(result)
+          # Absolute path for passing to other scripts
+          abs_path = os.path.abspath(pred_file)
           
-          # Save for next step
-          with open('validation_result.txt', 'w') as f:
-              f.write(result)
-          
-          if not is_valid:
-              sys.exit(1)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+              fh.write(f'file_path={abs_path}\n')
+              fh.write(f'team_name={team_name}\n')
           "
 
-      - name: Decode test labels
-        if: success()
+      - name: Enforce Single Submission Rule
+        id: check_rule
         run: |
-          # Decode test labels from GitHub Secrets
-          echo "${{ secrets.TEST_LABELS_BASE64 }}" | base64 -d > test_labels.csv
+          python -c "
+          import pandas as pd
+          import sys
+          import os
+          
+          leaderboard_path = 'organizer_repo/leaderboard/leaderboard.csv'
+          current_user = '${{ github.actor }}'
+          
+          if os.path.exists(leaderboard_path):
+              try:
+                  df = pd.read_csv(leaderboard_path)
+                  
+                  if 'github_user' in df.columns:
+                      # Normalize to lowercase for comparison
+                      existing_users = df['github_user'].astype(str).str.lower().values
+                      if current_user.lower() in existing_users:
+                          print(f'::error::User \'{current_user}\' has already submitted! Only one submission allowed per participant.')
+                          sys.exit(1)
+                  
+                  print(f'User \'{current_user}\' is eligible. Proceeding.')
+              except Exception as e:
+                  print(f'::warning::Could not read leaderboard: {e}. Proceeding assuming empty.')
+          else:
+              print('Leaderboard empty. Proceeding.')
+          "
 
-      - name: Score submission
-        if: success()
+      - name: Decode Labels
+        env:
+          TEST_LABELS_B64: ${{ secrets.TEST_LABELS_BASE64 }}
+        run: |
+          if [ -z "$TEST_LABELS_B64" ]; then
+            echo "::error::TEST_LABELS_B64 secret is missing!"
+            exit 1
+          fi
+          echo "$TEST_LABELS_B64" | base64 -d > test_labels.csv
+
+      - name: Score Submission
         id: score
         run: |
-          python competition/evaluate.py \
-            ${{ steps.find_submission.outputs.submission_dir }}/predictions.csv \
+          # 1. Generate Markdown Report for Comment
+          python organizer_repo/competition/evaluate.py \
+            "${{ steps.find_sub.outputs.file_path }}" \
             test_labels.csv \
-            --format markdown > score_result.txt
-          
-          cat score_result.txt
+            --format markdown > score_report.md
+            
+          # 2. Generate JSON Report for Leaderboard Update
+          python organizer_repo/competition/evaluate.py \
+            "${{ steps.find_sub.outputs.file_path }}" \
+            test_labels.csv \
+            --format json > score_data.json
+            
+          cat score_report.md
 
-      - name: Post comment
+      - name: Update Leaderboard CSV
+        if: success()
+        run: |
+          python -c "
+          import pandas as pd
+          import os
+          import json
+          from datetime import datetime
+          
+          json_path = 'score_data.json'
+          csv_path = 'organizer_repo/leaderboard/leaderboard.csv'
+          team = '${{ steps.find_sub.outputs.team_name }}'
+          user = '${{ github.actor }}'
+          
+          # Parse Scores from JSON
+          with open(json_path, 'r') as f:
+              scores = json.load(f)
+              
+          score = scores.get('combined_nmae', 99.9)
+          print(f'Parsed Score: {score}')
+          
+          # New Row Data
+          new_row = {
+              'timestamp_utc': datetime.utcnow().isoformat() + 'Z',
+              'team': team,
+              'github_user': user,
+              'model_type': 'participant',
+              'combined_nmae': score,
+              'pressure_nmae': scores.get('pressure_nmae', 0),
+              'temperature_nmae': scores.get('temperature_nmae', 0),
+              'speed_nmae': scores.get('speed_nmae', 0),
+              'notes': 'GitHub Submission'
+          }
+          
+          df_new = pd.DataFrame([new_row])
+          
+          if os.path.exists(csv_path):
+              df_old = pd.read_csv(csv_path)
+              df_out = pd.concat([df_old, df_new], ignore_index=True)
+          else:
+              df_out = df_new
+              
+          # Save with standard format
+          df_out.to_csv(csv_path, index=False)
+          print('Leaderboard CSV updated.')
+          "
+
+      - name: Commit Leaderboard Update
+        if: success()
+        run: |
+          cd organizer_repo
+          git config user.name "Leaderboard Bot"
+          git config user.email "bot@github.com"
+          git add leaderboard/leaderboard.csv
+          
+          if git diff --staged --quiet; then
+            echo "No changes to leaderboard.csv"
+          else
+            git commit -m "Update leaderboard: ${{ steps.find_sub.outputs.team_name }} (@${{ github.actor }})"
+            # Pull before push to handle race conditions
+            git pull --rebase origin master
+            git push
+          fi
+
+      - name: Post Result Comment
         if: always()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
+            let body = '## NeurIPS Submission System\n\n';
             
-            let comment = '## Submission Evaluation\n\n';
-            
-            // Add validation result
-            if (fs.existsSync('validation_result.txt')) {
-              comment += fs.readFileSync('validation_result.txt', 'utf8');
-            }
-            
-            // Add score if validation passed
-            if (fs.existsSync('score_result.txt')) {
-              comment += '\n\n';
-              comment += fs.readFileSync('score_result.txt', 'utf8');
-              comment += '\n\n---\n\n';
-              comment += '✅ **Submission is valid and scored!**\n\n';
-              comment += 'Once this PR is merged, your score will be added to the leaderboard.';
+            if (fs.existsSync('score_report.md')) {
+                body += fs.readFileSync('score_report.md', 'utf8');
+                body += '\n\n✅ **Score recorded!** Check the [Leaderboard](../blob/master/leaderboard/leaderboard.md).\n\n*This PR has been automatically closed. Your submission files are NOT stored in the repository — only your score appears on the leaderboard.*';
             } else {
-              comment += '\n\n---\n\n';
-              comment += '❌ Please fix the errors above and update your submission.';
+                body += '❌ **Scoring Failed.** Check the logs. (Did you already submit? One submission per user.)';
             }
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: comment
+              body: body
             });
 
-      - name: Clean up
+      - name: Close PR (Don't Merge)
         if: always()
-        run: |
-          rm -f test_labels.csv validation_result.txt score_result.txt
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.pulls.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              state: 'closed'
+            });
+
+      - name: Cleanup
+        if: always()
+        run: rm -f test_labels.csv score_report.md score_data.json
+

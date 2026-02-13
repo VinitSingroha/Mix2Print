@@ -24,37 +24,41 @@ def validate_submission(submission_dir: str, test_nodes_path: str) -> Tuple[bool
     
     # Check files exist
     pred_path = os.path.join(submission_dir, 'predictions.csv')
-    meta_path = os.path.join(submission_dir, 'metadata.json')
     
     if not os.path.exists(pred_path):
         errors.append("predictions.csv not found")
         return False, errors, metadata
-    
-    if not os.path.exists(meta_path):
-        errors.append("metadata.json not found")
-        return False, errors, metadata
-    
-    # Load and validate metadata
-    try:
-        with open(meta_path, 'r') as f:
-            metadata = json.load(f)
         
-        required_fields = ['team', 'run_id', 'model_type']
-        for field in required_fields:
-            if field not in metadata:
-                errors.append(f"metadata.json missing required field: {field}")
-        
-        # Validate model_type
-        valid_types = ['human', 'llm-only', 'human+llm']
-        if metadata.get('model_type') not in valid_types:
-            errors.append(f"model_type must be one of: {valid_types}")
-    
-    except json.JSONDecodeError as e:
-        errors.append(f"Invalid JSON in metadata.json: {e}")
-        return False, errors, metadata
-    except Exception as e:
-        errors.append(f"Error reading metadata.json: {e}")
-        return False, errors, metadata
+    # Metadata is optional now
+    meta_path = os.path.join(submission_dir, 'metadata.json')
+    if os.path.exists(meta_path):
+        try:
+            with open(meta_path, 'r') as f:
+                metadata = json.load(f)
+        except Exception:
+            pass # Optional
+            
+    # Default metadata if missing
+    if 'team' not in metadata:
+        # Try to infer from path
+        try:
+            # Assumes submission_dir is .../inbox/TeamName/RunID
+            parts = submission_dir.replace('\\', '/').split('/')
+            if 'inbox' in parts:
+                idx = parts.index('inbox')
+                if idx + 1 < len(parts):
+                    metadata['team'] = parts[idx+1]
+                if idx + 2 < len(parts):
+                    metadata['run_id'] = parts[idx+2]
+        except:
+            pass
+            
+    if 'team' not in metadata:
+        metadata['team'] = 'Unknown Team'
+    if 'run_id' not in metadata:
+        metadata['run_id'] = 'unknown_run'
+    if 'model_type' not in metadata:
+        metadata['model_type'] = 'unknown'
     
     # Load and validate predictions
     try:

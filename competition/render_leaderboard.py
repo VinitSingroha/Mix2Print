@@ -46,7 +46,7 @@ def main():
     
     lines = []
     lines.append("# 🏆 Bioink GNN Challenge Leaderboard\n\n")
-    lines.append("This leaderboard is **auto-updated** when a submission PR is merged. ")
+    lines.append("This leaderboard is **auto-updated** when a submission PR is scored. ")
     lines.append("For interactive search and filters, enable GitHub Pages and open **/docs/leaderboard.html**.\n\n")
     lines.append("**Metric:** Normalized MAE (NMAE) - Lower is better\n\n")
     

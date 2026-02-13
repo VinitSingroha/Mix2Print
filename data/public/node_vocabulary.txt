@@ -1,0 +1,36 @@
+0,Alginate
+1,Alginate Dialdehyde
+2,Alginate Methacrylated
+3,Alginate Oxidized
+4,Beta Tricalcium Phosphate
+5,Bioactive Glass
+6,Carbopol
+7,Carboxymethyl Cellulose
+8,Cellulose Nanofibrillated
+9,Cellulose Nanofibrils
+10,Chitosan
+11,Collagen
+12,Diclofenac Sodium
+13,Diethyl fumarate (DEF)
+14,Fibrinogen
+15,Gelatin
+16,Gelatin Methacrylated
+17,Gellan Gum
+18,Glycerol
+19,Graphene Oxide
+20,Hyaluronic Acid
+21,Hyaluronic Acid Methacrylated
+22,Hydroxyapatite
+23,Hydroxypropyl Cellulose
+24,Lactose
+25,Laponite
+26,Lidocaine
+27,Methylcellulose
+28,PCL
+29,PEG
+30,PLGA
+31,Pluronic F127
+32,Poly(vinylpyrrolidone-co-vinyl acetate)
+33,Polyethylene oxide
+34,Polyplasdone
+35,Polypropylene fumarate (PPF)

@@ -1,12 +1,27 @@
-# 🧬 Bioink GNN Challenge
+#  Bioink parameters prediction using GNN 
 
-A **secure, reproducible competition** for predicting 3D bioprinting parameters using Graph Neural Networks. Part of a research initiative comparing human-designed vs LLM-generated GNN architectures.
+A challenge for predicting 3D bioprinting parameters using Graph Neural Networks. 
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
+## 🧪 What is Bioprinting?
+Bioprinting is an additive manufacturing process that functions similarly to 3D printing but uses **"bio-inks"**—materials combined with living cells. Instead of printing plastic or metal, we print tissue-like structures layer-by-layer. This technology is at the forefront of regenerative medicine, aiming to create functional organs, skin grafts, and disease models for drug testing without animal subjects.
+
+The most common method is **Extrusion-based Bioprinting**, where a syringe-like printhead pushes bio-ink through a needle. Success depends on the perfect balance between material viscosity, cell viability, and the mechanical parameters of the printer.
+
+## 🍳 Think of Bioprinting Like Cooking (Seriously)
+If you’ve ever cooked a complex dish, you already understand the core problem in bioprinting. 
+
+You start with **ingredients** (biomaterials like Gelatin, Alginate, or Fibrinogen) in specific proportions. You choose **how to cook**: the heat level, the pressure applied to the "piping bag," and the speed of your hand. If you get it right, the structure holds its shape. If you don't, it’s a mess—either too runny, too stiff, or the "cells" (the biological garnish) simply don't survive.
+
+Currently, these "recipes" are scattered across thousands of research papers. This challenge is about learning the **recipe logic** behind bioprinting using the power of Graph Machine Learning.
+
+---
+
 ## 📋 Challenge Overview
+
 
 ### Task
 Predict **three continuous targets** from bioink formulation graphs:
@@ -15,7 +30,52 @@ Predict **three continuous targets** from bioink formulation graphs:
 - **Temperature** (°C): Printing temperature  
 - **Speed** (mm/s): Print head velocity
 
-### Dataset
+## 📐 Graph Specification (NeurIPS Guideline)
+
+### Graph Definition
+Each formulation is a graph $G_i = (V_i, E_i, X_i)$ where:
+- $V_i$: Biomaterials in formulation $i$
+- $E_i$: Fully connected edges between all materials
+- $X_i \in R^{n_i \times D}$: Node feature matrix (Dimension $D \approx 31$)
+
+Target $y_i \in R^3$: (pressure, temperature, speed)
+
+### 1️⃣ Adjacency Matrix (Mandatory)
+For formulation $i$ with $n$ materials:
+$A_i \in R^{n_i \times n_i}$
+
+- **Binary connectivity**: $A_{ij} = 1$ for all $i, j$ (Fully connected clique).
+- **Topology**: Represents a mixture where all components potentially interact.
+- **Note**: While the provided $A$ is binary, participants are encouraged to explore weighted adjacency strategies (e.g., based on concentration differences) closer to the physical reality of mixture interactions.
+
+Files: `data/public/train_graphs/graph_{id}_A.npy`
+
+### 2️⃣ Node Feature Matrix X
+Each node corresponds to one biomaterial in the formulation.
+$X_i$ shape: $(n_i \times D)$ where $D = N_{materials} + 1$.
+
+| Feature | Description | Dim |
+|---------|-------------|-----|
+| Material Identity | One-Hot Encoding of material type | ~30 |
+| Concentration | Normalized concentration in formulation | 1 |
+
+Files: `data/public/train_graphs/graph_{id}_X.npy`
+
+### 3️⃣ Targets
+Graph-level regression targets:
+- **Pressure** (kPa)
+- **Temperature** (°C)
+- **Speed** (mm/s)
+
+Files: `data/public/train_graphs/graph_{id}_y.npy` (Train only)
+
+### 📂 Dataset Provided
+The processed graph dataset (`.npy` matrices) is already generated and available in:
+- `data/public/train_graphs/`
+- `data/public/test_graphs/`
+
+For transparency, the generation script is included as `scripts/build_graph.py`.
+
 ### Dataset
 - **423 formulations** from peer-reviewed publications
 - **30 biomaterials** (appearing ≥5 times each)
@@ -40,23 +100,20 @@ Lower is better. Range: 0.0 (perfect) to 1.0+ (poor).
 ```bash
 git clone <this-repo>
 cd bioink-gnn-challenge
+pip install -r requirements.txt
 ```
 
-Public data is in `data/public/`:
-- `train.csv` - Training set with labels
-- `test_features.csv` - Test features (no labels)
-- `test_nodes.csv` - Test IDs
-- `sample_submission.csv` - Example format
+Graph data (ready to use) is in `data/public/`:
+- `train_graphs/` — `.npy` files: `graph_{id}_A.npy`, `graph_{id}_X.npy`, `graph_{id}_y.npy`
+- `test_graphs/` — `.npy` files: `graph_{id}_A.npy`, `graph_{id}_X.npy`
+- `node_vocabulary.txt` — Material index mapping
+- `train.csv` — Original CSV (for reference)
+- `test_nodes.csv` — Test IDs
+- `sample_submission.csv` — Example submission format
 
 ### 2. Train Your Model
 
 Train on `train.csv`. Since there is no official validation set, you should create your own split (e.g., 80/20) from the training data to evaluate your model locally.
-
-Use any approach:
-- Graph Neural Networks (GCN, GAT, GraphSAGE, etc.)
-- Traditional ML (Random Forest, XGBoost, etc.)
-- Hybrid models
-- LLM-generated architectures
 
 ### 3. Generate Predictions
 
@@ -76,31 +133,20 @@ Create a folder structure:
 
 ```
 submissions/inbox/<team_name>/<run_id>/
-├── predictions.csv
-└── metadata.json
+└── predictions.csv
 ```
 
-Example `metadata.json`:
+Example: `submissions/inbox/TeamAlpha/run_01/predictions.csv`
 
-```json
-{
-  "team": "YourTeamName",
-  "run_id": "run_001",
-  "model_type": "human",
-  "model_description": "3-layer GAT with attention pooling",
-  "features_used": ["material_graph", "concentrations", "needle_diameter"],
-  "training_time_hours": 2.5,
-  "framework": "PyTorch Geometric 2.3.0",
-  "notes": "Used early stopping with patience=20"
-}
-```
+**Model types (for your reference in PR description):**
+- `human` — Designed by humans
+- `llm-only` — Generated entirely by LLM
+- `human+llm` — Collaborative design
 
-**Model types:**
-- `human` - Designed by humans
-- `llm-only` - Generated entirely by LLM
-- `human+llm` - Collaborative design
-
-Open a **Pull Request** to `main`. Your submission will be automatically scored!
+**Submission Policy (Strict)**
+- 🚨 **One Submission Only**: Each participant (GitHub user) is allowed exactly ONE submission. Subsequent submissions will be automatically rejected.
+- **Privacy**: Your PR is NOT merged. We score your submission privately and update the public leaderboard.
+- **Format**: Submit only `predictions.csv`. No code execution.
 
 ---
 
@@ -152,12 +198,14 @@ bioink-gnn-challenge/
 ├── data/
 │   ├── public/                  # Visible to participants
 │   │   ├── train.csv
-│   │   ├── val.csv
 │   │   ├── test_features.csv
 │   │   ├── test_nodes.csv
-│   │   └── sample_submission.csv
-│   └── private/                 # NOT in git (GitHub Secrets)
-│       └── test_labels.csv
+│   │   ├── train_graphs/        # A, X, y matrices (npy)
+│   │   ├── test_graphs/         # A, X matrices (npy)
+│   │   └── node_vocabulary.txt  # Material list
+│
+├── scripts/
+│   └── build_graph.py          # Script used to generate graphs
 │
 ├── competition/                 # Evaluation code
 │   ├── data_utils.py           # Parsing & preprocessing
@@ -168,8 +216,11 @@ bioink-gnn-challenge/
 │
 ├── baselines/                   # Reference implementations
 │   ├── README.md
-│   ├── random_forest.py
-│   └── simple_gcn.py
+│   ├── gnn_utils.py            # Graph data loader (npy → PyG)
+│   ├── mlp_baseline.py         # MLP (ignores graph structure)
+│   ├── gcn_baseline.py         # Graph Convolutional Network
+│   ├── gat_baseline.py         # Graph Attention Network
+│   └── random_forest_baseline.py # Tabular baseline
 │
 ├── submissions/
 │   └── inbox/                   # PR submissions go here
@@ -187,97 +238,12 @@ bioink-gnn-challenge/
     ├── score_submission.yml     # Auto-score PRs
     └── update_leaderboard.yml   # Update on merge
 ```
-
 ---
 
-## 📏 Submission Rules
 
-### ✅ Allowed
-- Any model architecture (GNN, ML, hybrid, etc.)
-- Unlimited offline training
-- Use of validation set for hyperparameter tuning
-- Multiple submissions (track via `run_id`)
-- LLM assistance (declare in `model_type`)
+## 📖 Dataset link
 
-### ❌ Not Allowed
-- Using test set labels for training
-- Manual labeling of test data
-- External datasets beyond provided data
-- Modifying evaluation scripts
-- Submitting code (predictions only)
-
-### Verification
-Top 3 teams must provide **reproducible code** post-challenge for verification.
-
----
-
-## 🤖 Human vs LLM Research
-
-This challenge supports research comparing human and LLM capabilities in GNN design.
-
-### Metadata Tracking
-- `model_type`: human / llm-only / human+llm
-- `model_description`: Architecture details
-- `framework`: PyTorch Geometric, DGL, etc.
-
-### Research Questions
-1. Do LLMs design competitive GNN architectures?
-2. What patterns emerge in LLM vs human designs?
-3. Does human+LLM collaboration outperform either alone?
-
-### Fair Comparison
-- Fixed time budget (e.g., 2 hours)
-- Fixed submission budget (e.g., 5 runs)
-- Same hardware access
-- Honor system (post-challenge survey)
-
----
-
-## 🛠️ Development Setup
-
-### Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Prepare Data (Organizers Only)
-
-```bash
-python scripts/prepare_data.py
-```
-
-This creates train/test splits from `data.csv` (70% train, 30% test).
-
-### Test Evaluation Locally
-
-```bash
-python competition/evaluate.py \
-    submissions/inbox/example/run_001/predictions.csv \
-    data/private/test_labels.csv \
-    --format markdown
-```
-
-### Render Leaderboard
-
-```bash
-python competition/render_leaderboard.py
-```
-
----
-
-## 📖 Citation
-
-If you use this challenge in academic work, please cite:
-
-```bibtex
-@misc{bioink-gnn-challenge,
-  title={Bioink GNN Challenge: Predicting 3D Bioprinting Parameters},
-  author={[Your Name]},
-  year={2026},
-  url={https://github.com/[your-org]/bioink-gnn-challenge}
-}
-```
+The raw dataset for the data used in this challenge can be found at [https://cect.umd.edu/database]
 
 ---
 
@@ -291,17 +257,8 @@ MIT License - See [LICENSE](LICENSE) for details.
 
 - **Issues:** Use GitHub Issues for bugs/questions
 - **Discussions:** Use GitHub Discussions for general chat
-- **Email:** [your-email] for private inquiries
+- **Email:** [vineet10338@gmail.com] for private inquiries
 
 ---
-
-## 🎯 Tips for Success
-
-1. **Start simple:** Beat the Random Forest baseline first
-2. **Feature engineering:** Material properties, graph topology, concentration patterns
-3. **Multi-task learning:** Share representations across targets
-4. **Validation strategy:** Use local validation split to prevent overfitting
-5. **Ensemble methods:** Combine multiple models
-6. **Domain knowledge:** Understand bioprinting physics
 
 Good luck! 🚀

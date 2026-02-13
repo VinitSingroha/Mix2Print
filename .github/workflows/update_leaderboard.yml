@@ -2,7 +2,7 @@ name: Update Leaderboard
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
       - "leaderboard/leaderboard.csv"
 
