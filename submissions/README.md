@@ -1,36 +1,50 @@
 # Submissions
 
-## ⚠️ One Submission Per Participant
+## 🔐 Secure Submission Process
 
-Each GitHub user is allowed **exactly one** submission. Subsequent submissions will be automatically rejected.
+To protect your model's predictions from being visible to other participants in the public Pull Request history, we use **End-to-End Encryption**. Only the scoring server can read your submitted file.
 
-## Structure
+## Submission Structure
 
 ```
 inbox/
 └── YourTeamName/
-    └── predictions.csv
+    └── submission.enc
 ```
 
-## Required File
+## How to Submit
 
-### predictions.csv
-```csv
-id,pressure,temperature,speed
-340,150.5,25.0,5.0
-341,800.0,155.0,1.2
-...
+### 1. Generate Your Predictions
+Ensure your model generates a `predictions.csv` with the following columns:
+- `id`: The formulation ID
+- `pressure`: Predicted pressure (kPa)
+- `temperature`: Predicted temperature (°C)
+- `speed`: Predicted speed (mm/s)
+
+### 2. Encrypt Your File
+You must encrypt your CSV before uploading. Run the encryption tool provided in the repository:
+
+```bash
+python scripts/encrypt_submission.py predictions.csv --team YourTeamName
 ```
+This will generate a file named `submission.enc`. **This is the only file you should upload.**
 
-## Submission Process
+### 3. Open a Pull Request
+1. Fork this repository.
+2. Create your submission folder: `submissions/inbox/<YourTeamName>/`.
+3. Add your `submission.enc` file to that folder.
+4. Open a Pull Request from your fork to the `master` branch of the main repository.
 
-1. Fork this repository
-2. Create your submission folder: `submissions/inbox/<TeamName>/`
-3. Add `predictions.csv` (only this file is required)
-4. Open a Pull Request to `master`
-5. Wait for automatic scoring (a bot will comment with your score)
-6. Your score will appear on the leaderboard
+### 4. Automatic Scoring
+Once you open the PR, our bot will:
+1. Securely decrypt your file using the private key stored in GitHub Secrets.
+2. Calculate your NMAE score.
+3. Post a comment on the PR with your results.
+4. Automatically update the [Leaderboard](https://vinitsingroha.github.io/GNN-Challenge/leaderboard.html).
+5. Close the Pull Request (your data is processed and recorded).
 
-**Note:** Your PR will NOT be merged. We score privately and update the leaderboard on the main branch.
+## ⚠️ One Submission Per Participant
+Each GitHub user/team is allowed **exactly one** successful submission. Subsequent submissions will be automatically rejected by the scoring bot.
 
-See [README.md](../README.md) for full details.
+---
+See the main [README.md](../README.md) for full competition details.
