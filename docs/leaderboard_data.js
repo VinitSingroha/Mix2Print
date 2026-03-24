@@ -1,13 +1,24 @@
 window.LEADERBOARD_DATA = [
   {
+    "timestamp_utc": "2026-03-24T20:45:32.857013Z",
+    "team": "Hadil_Explorer",
+    "github_user": "hadilaff",
+    "model_type": "participant",
+    "combined_nmae": "0.05793007839757273",
+    "pressure_nmae": "0.0856737725434492",
+    "temperature_nmae": "0.05058093442982456",
+    "speed_nmae": "0.03753552821944444",
+    "notes": "GitHub Submission"
+  },
+  {
     "timestamp_utc": "2026-03-18T10:34:14.647731Z",
     "team": "Ignatius",
     "github_user": "ignatiusbalayo",
     "model_type": "participant",
-    "combined_nmae": "0.058514123300440764",
-    "pressure_nmae": "0.08484610941399287",
-    "temperature_nmae": "0.04975072664473684",
-    "speed_nmae": "0.04094553384259259",
+    "combined_nmae": "0.0585141233004407",
+    "pressure_nmae": "0.0848461094139928",
+    "temperature_nmae": "0.0497507266447368",
+    "speed_nmae": "0.0409455338425925",
     "notes": "GitHub Submission"
   },
   {
