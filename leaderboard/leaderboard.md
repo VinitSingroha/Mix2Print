@@ -3,7 +3,7 @@
 This leaderboard is **auto-updated** when a submission PR is scored. For interactive search and filters, enable GitHub Pages and open **/docs/leaderboard.html**.
 
 **Metric:** Normalized MAE (NMAE) - Lower is better  
-*Last Updated: 2026-04-02 11:55:56 UTC*
+*Last Updated: 2026-04-04 15:39:21 UTC*
 
 | Rank | Team | Model Type | NMAE | NMAE % | Date (UTC) | Notes |
 |---:|---|---|---:|---:|---|---|
@@ -13,5 +13,6 @@ This leaderboard is **auto-updated** when a submission PR is scored. For interac
 | 4 | bijay | `participant` | 0.0602321122612874 | 6.02% | 2026-04-02T04:01:10.259872Z | GitHub Submission |
 | 5 | Mubaraq | `participant` | 0.0604857215756372 | 6.05% | 2026-03-07T17:55:36.378564Z | GitHub Submission |
 | 6 | AIkram | `participant` | 0.0620911159300281 | 6.21% | 2026-03-05T11:40:40.513952Z | GitHub Submission |
-| 7 | gururgg | `participant` | 0.06332929284623297 | 6.33% | 2026-04-02T11:55:56.078464Z | GitHub Submission |
-| 8 | Rosa_PY | `participant` | 0.0689027832128296 | 6.89% | 2026-03-09T07:59:19.877057Z | GitHub Submission |
+| 7 | gururgg | `participant` | 0.0633292928462329 | 6.33% | 2026-04-02T11:55:56.078464Z | GitHub Submission |
+| 8 | emmanuel_owusu | `participant` | 0.06470063413559034 | 6.47% | 2026-04-04T15:39:21.164138Z | GitHub Submission |
+| 9 | Rosa_PY | `participant` | 0.0689027832128296 | 6.89% | 2026-03-09T07:59:19.877057Z | GitHub Submission |
