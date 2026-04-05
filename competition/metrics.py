@@ -11,6 +11,13 @@ PRESSURE_RANGE = 1496.0  # kPa
 TEMPERATURE_RANGE = 228.0  # °C
 SPEED_RANGE = 90.0  # mm/s
 
+# Difficulty-based weights for weighted NMAE
+# Pressure is hardest to predict (highest weight), speed is easiest (lowest weight)
+# Weights are empirically derived from participant score averages in leaderboard.csv
+PRESSURE_WEIGHT = 0.60
+TEMPERATURE_WEIGHT = 0.25
+SPEED_WEIGHT = 0.15
+
 
 def mean_absolute_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """Calculate MAE."""
@@ -34,7 +41,7 @@ def compute_scores(predictions_path: str, ground_truth_path: str) -> Dict:
     Returns dict with:
         - pressure_mae, temperature_mae, speed_mae
         - pressure_nmae, temperature_nmae, speed_nmae
-        - combined_nmae (average of three NMAEs)
+        - combined_nmae (weighted average of three NMAEs)
         - combined_pct (combined_nmae as percentage)
         - n_samples
     """
@@ -82,8 +89,8 @@ def compute_scores(predictions_path: str, ground_truth_path: str) -> Dict:
     temperature_nmae = normalized_mae(temp_true, temp_pred, TEMPERATURE_RANGE)
     speed_nmae = normalized_mae(speed_true, speed_pred, SPEED_RANGE)
     
-    # Combined NMAE (equal weight to all three targets)
-    combined_nmae = (pressure_nmae + temperature_nmae + speed_nmae) / 3.0
+    # Combined NMAE (weighted based on difficulty)
+    combined_nmae = (pressure_nmae * PRESSURE_WEIGHT) + (temperature_nmae * TEMPERATURE_WEIGHT) + (speed_nmae * SPEED_WEIGHT)
     
     return {
         'pressure_mae': float(pressure_mae),
