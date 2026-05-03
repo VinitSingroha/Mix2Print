@@ -177,7 +177,7 @@ async function main() {
   const status = document.getElementById("status");
 
   // GitHub Raw URL — always live, updates immediately after workflow commits
-  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/VinitSingroha/GNN-Challenge/master/leaderboard/leaderboard.csv";
+  const GITHUB_RAW_URL = "https://raw.githubusercontent.com/VinitSingroha/Mix2Print/master/leaderboard/leaderboard.csv";
 
   try {
     let rows;
