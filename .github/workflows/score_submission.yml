@@ -20,9 +20,7 @@ jobs:
         with:
           ref: master
           path: organizer_repo
-          fetch-depth: 0 # Full history needed for pushes? Maybe not, but safer.
-          # Note: For branch protection, you might need a PAT token here.
-          # For public repos without branch protection, defaultGITHUB_TOKEN works.
+          fetch-depth: 0
 
       # 2. Checkout Participant's Submission Files (Handle Forks)
       - name: Checkout Participant Submission
@@ -46,7 +44,6 @@ jobs:
           python -c "
           import os, glob
           
-          # Look for any .enc file in participant repo
           files = glob.glob('participant_repo/submissions/inbox/**/*.enc', recursive=True)
           if not files:
               print('::error::No .enc file found! Please run scripts/encrypt_submission.py before uploading.')
@@ -54,7 +51,6 @@ jobs:
               
           enc_file = files[0]
           
-          # Extract Team Name from folder structure: submissions/inbox/TEAM_NAME/submission.enc
           path_norm = enc_file.replace('\\\\', '/')
           parts = path_norm.split('/')
           try:
@@ -71,35 +67,6 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
               fh.write(f'enc_path={abs_path}\n')
               fh.write(f'team_name={team_name}\n')
-          "
-
-      - name: Enforce Single Submission Rule
-        id: check_rule
-        run: |
-          python -c "
-          import pandas as pd
-          import sys
-          import os
-          
-          leaderboard_path = 'organizer_repo/leaderboard/leaderboard.csv'
-          current_user = '${{ github.actor }}'
-          
-          if os.path.exists(leaderboard_path):
-              try:
-                  df = pd.read_csv(leaderboard_path)
-                  
-                  if 'github_user' in df.columns:
-                      # Normalize to lowercase for comparison
-                      existing_users = df['github_user'].astype(str).str.lower().values
-                      if current_user.lower() in existing_users:
-                          print(f'::error::User \'{current_user}\' has already submitted! Only one submission allowed per participant.')
-                          sys.exit(1)
-                  
-                  print(f'User \'{current_user}\' is eligible. Proceeding.')
-              except Exception as e:
-                  print(f'::warning::Could not read leaderboard: {e}. Proceeding assuming empty.')
-          else:
-              print('Leaderboard empty. Proceeding.')
           "
 
       - name: Decode Labels
@@ -130,13 +97,11 @@ jobs:
             exit 1
           fi
           
-          # 1. Generate Markdown Report for Comment
           python organizer_repo/competition/evaluate.py \
             "predictions.csv" \
             test_labels.csv \
             --format markdown > score_report.md
             
-          # 2. Generate JSON Report for Leaderboard Update
           python organizer_repo/competition/evaluate.py \
             "predictions.csv" \
             test_labels.csv \
@@ -144,7 +109,6 @@ jobs:
             
           cat score_report.md
           
-          # Cleanup sensitive file immediately
           rm predictions.csv
 
       - name: Update Leaderboard CSV
@@ -161,14 +125,12 @@ jobs:
           team = '${{ steps.find_sub.outputs.team_name }}'
           user = '${{ github.actor }}'
           
-          # Parse Scores from JSON
           with open(json_path, 'r') as f:
               scores = json.load(f)
               
           score = scores.get('combined_nmae', 99.9)
           print(f'Parsed Score: {score}')
           
-          # New Row Data
           new_row = {
               'timestamp_utc': datetime.utcnow().isoformat() + 'Z',
               'team': team,
@@ -189,7 +151,6 @@ jobs:
           else:
               df_out = df_new
               
-          # Save with standard format
           df_out.to_csv(csv_path, index=False)
           print('Leaderboard CSV updated.')
           "
@@ -201,7 +162,6 @@ jobs:
           git config user.name "Leaderboard Bot"
           git config user.email "bot@github.com"
 
-          # Render leaderboard.md and docs/ from updated CSV
           python competition/render_leaderboard.py
 
           git add leaderboard/leaderboard.csv leaderboard/leaderboard.md docs/leaderboard.csv docs/leaderboard_data.js
@@ -210,7 +170,6 @@ jobs:
             echo "No changes to leaderboard"
           else
             git commit -m "Update leaderboard: ${{ steps.find_sub.outputs.team_name }} (@${{ github.actor }})"
-            # Pull before push to handle race conditions
             git pull --rebase origin master
             git push
           fi
@@ -223,7 +182,6 @@ jobs:
             const fs = require('fs');
             let body = '## Submission Scoring System\n\n';
             
-            // Check if eval failed based on steps object outcome
             let is_success = "${{ steps.score.outcome }}" === "success";
             
             if (fs.existsSync('score_report.md')) {
@@ -236,7 +194,7 @@ jobs:
                    body += '\n\n❌ **Scoring Failed.** Please check the error above and fix your submission.';
                 }
             } else {
-                body += '❌ **Scoring Failed.** Critical error (Did you already submit? One submission per user, or incorrect file placement).';
+                body += '❌ **Scoring Failed.** Critical error (incorrect file placement or decryption issue).';
             }
             
             github.rest.issues.createComment({
@@ -261,4 +219,3 @@ jobs:
       - name: Cleanup
         if: always()
         run: rm -f test_labels.csv score_report.md score_data.json
-
