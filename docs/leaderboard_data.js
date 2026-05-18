@@ -12,6 +12,18 @@ window.LEADERBOARD_DATA = [
     "model_type": "participant"
   },
   {
+    "timestamp_utc": "2026-05-18T19:42:19.487910Z",
+    "team": "Gemini-3-Flash",
+    "github_user": "faranbutt",
+    "type": "",
+    "combined_nmae": "0.06866454786158255",
+    "pressure_nmae": "0.08214045720254011",
+    "temperature_nmae": "0.05284296798245614",
+    "speed_nmae": "0.0411302102962963",
+    "notes": "GitHub Submission",
+    "model_type": "participant"
+  },
+  {
     "timestamp_utc": "2026-03-08T01:35:26.365509Z",
     "team": "Murad_Hossen",
     "github_user": "Murad-Hossen",
@@ -112,10 +124,10 @@ window.LEADERBOARD_DATA = [
     "team": "submission.enc",
     "github_user": "SanaeZR",
     "type": "",
-    "combined_nmae": "0.07427473843652724",
-    "pressure_nmae": "0.08997268909870768",
-    "temperature_nmae": "0.054200837573099424",
-    "speed_nmae": "0.044939437226851855",
+    "combined_nmae": "0.0742747384365272",
+    "pressure_nmae": "0.0899726890987076",
+    "temperature_nmae": "0.0542008375730994",
+    "speed_nmae": "0.0449394372268518",
     "notes": "GitHub Submission",
     "model_type": "participant"
   },
