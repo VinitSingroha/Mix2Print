@@ -1,5 +1,17 @@
 window.LEADERBOARD_DATA = [
   {
+    "timestamp_utc": "2026-05-18T20:57:39.778282Z",
+    "team": "Kimi K 2.6",
+    "github_user": "mubbytheback",
+    "type": "",
+    "combined_nmae": "0.06393874242447696",
+    "pressure_nmae": "0.079270952907754",
+    "temperature_nmae": "0.04507172383040936",
+    "speed_nmae": "0.034054931481481476",
+    "notes": "GitHub Submission",
+    "model_type": "participant"
+  },
+  {
     "timestamp_utc": "2026-05-17T11:51:43.387871Z",
     "team": "DeepSeek-v4-pro",
     "github_user": "randomuser1194",
@@ -16,9 +28,9 @@ window.LEADERBOARD_DATA = [
     "team": "Gemini-3-Flash",
     "github_user": "faranbutt",
     "type": "",
-    "combined_nmae": "0.06866454786158255",
-    "pressure_nmae": "0.08214045720254011",
-    "temperature_nmae": "0.05284296798245614",
+    "combined_nmae": "0.0686645478615825",
+    "pressure_nmae": "0.0821404572025401",
+    "temperature_nmae": "0.0528429679824561",
     "speed_nmae": "0.0411302102962963",
     "notes": "GitHub Submission",
     "model_type": "participant"
