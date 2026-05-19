@@ -1,0 +1,9 @@
+{
+  "competition": "Mix2Print",
+  "model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "provider": "Together AI",
+  "success": true,
+  "attempts_used": 2,
+  "wall_time_sec": 48.0,
+  "output_dir": "run_llama_api"
+}

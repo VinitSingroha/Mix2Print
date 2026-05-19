@@ -1,0 +1,61 @@
+import pandas as pd
+import numpy as np
+from sklearn.neural_network import MLPRegressor
+from sklearn.metrics import mean_absolute_error
+
+# Set seeds for reproducibility
+np.random.seed(42)
+
+# Load training and testing graph IDs
+train_ids = pd.read_csv('data/public/train.csv')['id']
+test_ids = pd.read_csv('data/public/test_nodes.csv')['id']
+
+# Load graph data and targets
+train_graphs = []
+train_targets = []
+for id in train_ids:
+    A = np.load(f'data/public/train_graphs/graph_{id}_A.npy')
+    X = np.load(f'data/public/train_graphs/graph_{id}_X.npy')
+    y = np.load(f'data/public/train_graphs/graph_{id}_y.npy')
+    train_graphs.append((A, X))
+    train_targets.append(y)
+
+test_graphs = []
+for id in test_ids:
+    A = np.load(f'data/public/test_graphs/graph_{id}_A.npy')
+    X = np.load(f'data/public/test_graphs/graph_{id}_X.npy')
+    test_graphs.append((A, X))
+
+# Define GNN layers
+def gnn_layer(A, X, W):
+    D = np.diag(1 / np.sqrt(np.sum(A, axis=1)))
+    A_norm = np.dot(np.dot(D, A), D)
+    return np.maximum(np.dot(X, W), 0)
+
+# Define GNN model
+def gnn_model(graphs, W1, W2):
+    graph_embeddings = []
+    for A, X in graphs:
+        H1 = gnn_layer(A, X, W1)
+        H2 = gnn_layer(A, H1, W2)
+        graph_embedding = np.mean(H2, axis=0)
+        graph_embeddings.append(graph_embedding)
+    return np.array(graph_embeddings)
+
+# Initialize weights
+num_features = train_graphs[0][1].shape[1]
+W1 = np.random.rand(num_features, 64)
+W2 = np.random.rand(64, 64)
+
+# Train regression model
+train_embeddings = gnn_model(train_graphs, W1, W2)
+mlp = MLPRegressor(hidden_layer_sizes=(64,), max_iter=1000)
+mlp.fit(train_embeddings, np.array(train_targets))
+
+# Make predictions on test graphs
+test_embeddings = gnn_model(test_graphs, W1, W2)
+predictions = mlp.predict(test_embeddings)
+
+# Save predictions to csv
+submission = pd.DataFrame({'id': test_ids, 'pressure': np.maximum(predictions[:, 0], 0), 'temperature': np.maximum(predictions[:, 1], 0), 'speed': np.maximum(predictions[:, 2], 0)})
+submission.to_csv('predictions.csv', index=False)

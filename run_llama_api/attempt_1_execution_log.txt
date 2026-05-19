@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "C:\Users\user\Documents\GitHub\Mix2Print\run_llama_api\attempt_1_solution.py", line 50, in <module>
+    train_embeddings = gnn_model(train_graphs, W1, W2)
+  File "C:\Users\user\Documents\GitHub\Mix2Print\run_llama_api\attempt_1_solution.py", line 39, in gnn_model
+    H1 = gnn_layer(A, X, W1)
+  File "C:\Users\user\Documents\GitHub\Mix2Print\run_llama_api\attempt_1_solution.py", line 33, in gnn_layer
+    return np.maximum(np.dot(np.dot(A_norm, X), W), 0)
+                      ~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+ValueError: shapes (1,37) and (31,64) not aligned: 37 (dim 1) != 31 (dim 0)
