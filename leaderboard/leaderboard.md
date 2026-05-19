@@ -13,7 +13,7 @@ This leaderboard is **auto-updated** when a submission PR is scored. For interac
 | 4 | Murad_Hossen |  | 0.0689210754185265 | 6.89% | 2026-03-08T01:35:26.365509Z | GitHub Submission |
 | 5 | llm_claude_47 | `participant` | 0.0690626168523397 | 6.91% | 2026-05-17T18:12:37.459127Z | GitHub Submission |
 | 6 | Ignatius |  | 0.0694871773859687 | 6.95% | 2026-03-18T10:34:14.647731Z | GitHub Submission |
-| 7 | Ignatius | `participant` | 0.06948717738596882 | 6.95% | 2026-05-19T11:48:04.922921Z | GitHub Submission |
+| 7 | llm_llama33_70b | `participant` | 0.06948717738596882 | 6.95% | 2026-05-19T11:48:04.922921Z | GitHub Submission |
 | 8 | peguy_mix | `participant` | 0.0696117675328825 | 6.96% | 2026-04-09T13:25:08.088327Z | GitHub Submission |
 | 9 | Hadil_Explorer |  | 0.0696798263664423 | 6.97% | 2026-03-24T20:45:32.857013Z | GitHub Submission |
 | 10 | Mubaraq |  | 0.0697766166334423 | 6.98% | 2026-03-07T17:55:36.378564Z | GitHub Submission |
