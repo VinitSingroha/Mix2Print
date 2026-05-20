@@ -73,13 +73,13 @@ window.LEADERBOARD_DATA = [
   },
   {
     "timestamp_utc": "2026-05-19T11:48:04.922921Z",
-    "team": "Ignatius",
-    "github_user": "ignatiusbalayo",
+    "team": " llm_llama33_70b",
+    "github_user": "llm_llama33_70b",
     "type": "",
-    "combined_nmae": "0.06948717738596882",
-    "pressure_nmae": "0.08484610941399287",
-    "temperature_nmae": "0.04975072664473684",
-    "speed_nmae": "0.04094553384259259",
+    "combined_nmae": "0.0694871773859688",
+    "pressure_nmae": "0.0848461094139928",
+    "temperature_nmae": "0.0497507266447368",
+    "speed_nmae": "0.0409455338425925",
     "notes": "GitHub Submission",
     "model_type": "participant"
   },
@@ -128,6 +128,18 @@ window.LEADERBOARD_DATA = [
     "pressure_nmae": "0.0835228141154189",
     "temperature_nmae": "0.0572317991593567",
     "speed_nmae": "0.0363788329907407",
+    "notes": "GitHub Submission",
+    "model_type": "participant"
+  },
+  {
+    "timestamp_utc": "2026-05-20T11:01:08.408923Z",
+    "team": "claude_opus_4_6",
+    "github_user": "thisisislam1",
+    "type": "",
+    "combined_nmae": "0.07189617772685837",
+    "pressure_nmae": "0.08449830978721035",
+    "temperature_nmae": "0.06045867975146199",
+    "speed_nmae": "0.040550146111111116",
     "notes": "GitHub Submission",
     "model_type": "participant"
   },
